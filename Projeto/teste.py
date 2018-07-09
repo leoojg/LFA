@@ -1,4 +1,4 @@
-def get_tokens():
+def get_tokens(): ## Leitura de tokens
     list = []
     while True:
         a = input()
@@ -7,7 +7,7 @@ def get_tokens():
         list.append(a)
     return list
 
-def get_er():
+def get_er(): ## Leitura de exprecoes regulares
     list = []
     while True:
         a = input()
@@ -16,7 +16,7 @@ def get_er():
         list.append(a)
     return list
 
-def add_token(A, token):
+def add_token(A, token): ## Adiciona todos os tokens em um automato A
     p = 0
     for i in token:
         prod = A[p]
@@ -29,7 +29,7 @@ def add_token(A, token):
     A[len(A)-1] += ' eps'
     return A
 
-def add_er(A, er):
+def add_er(A, er): ## Adiciona as expressoes regulares no automato A, duplica <S> para <S'> caso a expressao regular aceite retorno a <S> em alguma producao
     for i in er:
         p = ''
         for j in i:
@@ -43,20 +43,20 @@ def add_er(A, er):
         A.append(p)
     return A
 
-def find_epsT(prod, A):
+def find_epsT(prod, A): ## Encontra as epsilon transicoes, se houver, no automato A
     for i in range(len(A)):
         for j in range(len(prod)):
             if prod[j][0] in A[i] and prod[j][0] != A[i]:
                 prod[i].append(prod[j][0])
     return prod
 
-def get_prod(p, prod):
+def get_prod(p, prod): ## Retorna uma producao p em A(prod)
     for i in range(len(prod)):
         if prod[i][0] == p:
             return prod[i]
     return []
  
-def find_tI(prod):
+def find_tI(prod): ## Adiciona todas as producoes de <A> em <S> caso <S> tenha uma epsilon transicao <A>
     flag = True
     while flag:
         flag = False
@@ -69,7 +69,7 @@ def find_tI(prod):
                         p.append(j)
     return prod
 
-def clear_epsT(A):
+def clear_epsT(A): ## Executa as funcoes acima e remove as epsilon transicoes
     prod = []
     for i in A:
         prod.append(i[0].split())
@@ -89,7 +89,7 @@ def clear_epsT(A):
                 A[i].remove(prod[j][0])
     return A
 
-def get_sf(A):
+def get_sf(A): ## Retorna uma lista com os simbolos finais
     sf = []
     for i in A:
         for j in i[2:]:
@@ -99,13 +99,13 @@ def get_sf(A):
                 sf.append(j[0])
     return sf
 
-def create_p(len_sf):
+def create_p(len_sf): ## Cria uma lista com strings vazias do tamanho da lista dos simbolos finais
     p = []
     for i in range(len_sf):
         p.append('')
     return p
 
-def fixup_p(prod):
+def fixup_p(prod):  ## Ajusta o nome das producoes no AFD, para estado de erro ou cria uma producao com um '-' na frente se ela não existisse
     for i in range(len(prod)):
         if prod[i] == '':
             prod[i] = '-'
@@ -118,7 +118,7 @@ def fixup_p(prod):
             prod[i] = p
     return prod
 
-def clear_p(prod):
+def clear_p(prod): ## Remove os espacos de uma lista prod
     p = ''
     for i in prod:
         if i == ' ':
@@ -126,14 +126,14 @@ def clear_p(prod):
         p += i
     return p
 
-def check_prod(prod, p, test):
+def check_prod(prod, p, test): ## Verifica se uma producao p já pertence ao conjuto das producoes do AFD
     i = '<'
     if test:
         i += '-'
     p = i + p + '>'
     return p in prod
 
-def error_p(n):
+def error_p(n): ## Cria um estado de erro
     error = ['<->']
     error_p = []
     for i in range(n):
@@ -141,7 +141,7 @@ def error_p(n):
     error.append(error_p)
     return error
 
-def find_p(producoes_p, producao, A, sf):
+def find_p(producoes_p, producao, A, sf): ## Adiciona as producoes da 'producao' em 'producoes_p'
     ignore = ['eps', '|', '::=']
     producao = get_prod( producao, A)
     for i in producao[1:]:
@@ -155,7 +155,7 @@ def find_p(producoes_p, producao, A, sf):
         producoes_p[indice_p] += i[2:-1]
     return producoes_p
 
-def find_new_p(producoes_p, fila, prod):
+def find_new_p(producoes_p, fila, prod): ## Verifica se alguma producao de 'producoes_p' nao pertence ao conjunto de producoes de AFD e coloca em uma fila
     for i in producoes_p:
         if i == '':
             continue
@@ -168,7 +168,7 @@ def find_new_p(producoes_p, fila, prod):
     return fila
 
 
-def determinizacao(A):
+def determinizacao(A): ## Vare o automato aplicando o processo de determinizacao
     sf = sorted(get_sf(A))
     fila = []
     afd = []
@@ -206,21 +206,9 @@ def determinizacao(A):
     afd.append(error_p(len(sf)))
     return afd
 
-def fixup_afd(afd):
-    for i in afd:
-        if (i[0] == '*' and i[1][0] == '<') or i[0][0] == '<':
-            continue
-        if i[0] == '*':
-            x = 1
-        else:
-            x = 0
-        p = '<-'
-        p+= i[x]
-        p+= '>'
-        i[x] = p
-    return afd
+## fixup_afd nao foi utilizada nesse codigo, removida aqui.
 
-def check_p(check, p, AFD):
+def check_p(check, p, AFD): ## retorna os simbolos visitados a partir de um producao
     check.append(p)
     for i in AFD:
         if '<' + p + '>' in i:
@@ -234,7 +222,7 @@ def check_p(check, p, AFD):
             check += set(check_p(check, producoes[i], AFD))
     return check
 
-def minimizacao(AFD):
+def minimizacao(AFD): ## Remove os simbolos inalcancaveis mas nao remove os mortos
     check = set(check_p([],'S',AFD))
     remove_p = []
     for i in range(len(AFD)):
